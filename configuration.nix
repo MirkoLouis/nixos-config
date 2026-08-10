@@ -5,68 +5,68 @@
 { config, lib, pkgs, ... }:
 
 let
+  # SDDM astronaut theme with custom background video and login box position
   custom-astronaut = pkgs.sddm-astronaut.override {
     themeConfig = {
-      FormPosition = "right";             # Shifts login box to the right
-      Background = "${./login-video.mp4}"; # Embeds video from /etc/nixos/
+      FormPosition = "right";
+      Background = "${./login-video.mp4}";
     };
   };
 in
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [ ./hardware-configuration.nix ];
 
-  # Use the systemd-boot EFI boot loader.
+  # ── Boot & Kernel ──────────────────────────────────────────────────────────
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelPackages = pkgs.linuxPackages_cachyos; # CachyOS performance-optimized kernel
+  boot.supportedFilesystems = [ "ntfs" ];           # Enable NTFS (Windows partition support)
 
-  # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_cachyos;
-
-  networking.hostName = "MirkoInNIXOS"; # Define your hostname.
-
-  # Configure network connections interactively with nmcli or nmtui.
-  networking.networkmanager.enable = true;
-
-  # Set your time zone.
-  time.timeZone = "Asia/Manila";
+  # ── Networking ─────────────────────────────────────────────────────────────
+  networking.hostName = "MirkoInNIXOS";
+  networking.networkmanager.enable = true; # Manage connections via nmcli / nmtui
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
+  # ── Locale & Time ──────────────────────────────────────────────────────────
+  time.timeZone = "Asia/Manila";
 
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
+  # System locale — ensures proper UTF-8 encoding across all programs
+  i18n.defaultLocale = "en_US.UTF-8";
 
+  # TTY / virtual console settings
+  # Note: TTY fonts must be PSF (bitmap) format — TTF fonts like Nerd Fonts
+  # cannot be used here. Terminus is the best-looking monospaced PSF option.
+  console = {
+    earlySetup = true;    # Apply font from the very first boot message
+    font = "ter-v24n";    # Terminus 32px — clean and sharp on modern displays
+    keyMap = "us";
+    packages = [ pkgs.terminus_font ];
+  };
+
+  # ── Nix Settings ───────────────────────────────────────────────────────────
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-older-than 7d";
+    options = "--delete-older-than 7d"; # Auto-delete generations older than 7 days
   };
+  nixpkgs.config.allowUnfree = true;
 
-  boot.supportedFilesystems = [ "ntfs" ];
-  
+  # ── Filesystems ────────────────────────────────────────────────────────────
   fileSystems."/mnt/LinuxPart" = {
     device = "/dev/disk/by-uuid/015337c8-827b-452d-aa39-74d2745d95c5";
     fsType = "ext4";
   };
-  fileSystems."/mnt/WindowsPart" = { 
-    device = "/dev/disk/by-uuid/921072191072048F"; 
-    fsType = "ntfs-3g"; 
+  fileSystems."/mnt/WindowsPart" = {
+    device = "/dev/disk/by-uuid/921072191072048F";
+    fsType = "ntfs-3g";
     options = [ "rw" "uid=1000" "gid=100" "dmask=0022" "fmask=0022" ];
   };
+
+  # ── Hardware ───────────────────────────────────────────────────────────────
 
   # Bluetooth
   hardware.bluetooth = {
@@ -74,49 +74,46 @@ in
     powerOnBoot = true;
   };
 
-  # Graphics and Nvidia Prime
+  # NVIDIA Prime (Intel iGPU + NVIDIA dGPU hybrid graphics)
   hardware.graphics.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
-
   hardware.nvidia = {
     modesetting.enable = true;
-    open = false;
-    nvidiaSettings = true;
+    open = false;          # Use proprietary driver
+    nvidiaSettings = true; # Enable nvidia-settings GUI
     prime = {
       sync.enable = true;
-      intelBusId = "PCI:0:2:0";
+      intelBusId  = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
     };
   };
 
-  # Wayland / NVIDIA Environment Variables
-  environment.sessionVariables = {
-    # Force Wayland for GTK/Qt/Electron
-    NIXOS_OZONE_WL = "1";
-    XDG_SESSION_TYPE = "wayland";
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+  # Configure keymap in X11 (uncomment to override)
+  # services.xserver.xkb.layout = "us";
+  # services.xserver.xkb.options = "eurosign:e,caps:escape";
 
-    # NVIDIA / EGL Hardware Acceleration
-    LIBVA_DRIVER_NAME = "nvidia";
-    GBM_BACKEND = "nvidia-drm";
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    NVD_BACKEND = "direct";
+  # ── Display & Desktop ──────────────────────────────────────────────────────
+
+  # Wayland + NVIDIA environment variables
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL              = "1";      # Force Wayland for GTK/Qt/Electron apps
+    XDG_SESSION_TYPE            = "wayland";
+    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+    LIBVA_DRIVER_NAME           = "nvidia"; # VA-API via NVIDIA
+    GBM_BACKEND                 = "nvidia-drm";
+    __GLX_VENDOR_LIBRARY_NAME   = "nvidia";
+    NVD_BACKEND                 = "direct";
   };
 
-  # Display Environment
+  # SDDM login manager with astronaut theme
   services.displayManager.sddm = {
     enable = true;
     wayland.enable = true;
     theme = "${custom-astronaut}/share/sddm/themes/sddm-astronaut-theme";
-
-    # Remember the last logged-in user and desktop session
-    settings = {
-      Users = {
-        RememberLastUser = true;
-        RememberLastSession = true;
-      };
+    settings.Users = {
+      RememberLastUser    = true;
+      RememberLastSession = true;
     };
-
     extraPackages = with pkgs; [
       custom-astronaut
       kdePackages.qtsvg
@@ -125,164 +122,152 @@ in
     ];
   };
 
+  # KDE Plasma 6 desktop (Wayland session)
   services.desktopManager.plasma6.enable = true;
-
-  # Set defaultSession
   services.displayManager.defaultSession = lib.mkForce "plasma";
 
-  # For Development
+  # ── Audio ──────────────────────────────────────────────────────────────────
+  security.rtkit.enable = true; # Allows PipeWire to acquire real-time priority
+  services.pipewire = {
+    enable = true;
+    alsa.enable        = true;
+    alsa.support32Bit  = true; # Required for 32-bit Steam games
+    pulse.enable       = true; # PulseAudio compatibility layer
+  };
+
+  # ── Virtualisation ─────────────────────────────────────────────────────────
   virtualisation.podman.enable = true;
   virtualisation.containers.registries.search = [ "docker.io" ];
 
-  # Configure keymap in X11
-  # services.xserver.xkb.layout = "us";
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
+  # ── Network Sharing ────────────────────────────────────────────────────────
 
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable Samba service and set up shares
+  # Samba file shares (accessible to @wheel group and sambaro read-only user)
   services.samba = {
     enable = true;
-    openFirewall = true; # Automatically opens ports in the firewall for Samba
+    openFirewall = true;
     settings = {
       global = {
-        "workgroup" = "WORKGROUP";
+        "workgroup"    = "WORKGROUP";
         "server string" = "MirkoInNIXOS Samba Server";
         "netbios name" = "MirkoInNIXOS";
-        "security" = "user";
+        "security"     = "user";
         "guest account" = "nobody";
         "map to guest" = "Bad User";
       };
-      
-      # Example of a shared folder (repeat or create as many as you need)
       "Anime" = {
-        "path" = "/mnt/LinuxPart/Anime/"; # Change this to your target shared directory path
-        "browseable" = "yes";
-        "read only" = "no"; # Local write control; restricted by user permissions below
-        "guest ok" = "no";
-        "valid users" = "@wheel, sambaro"; # Allow admin group and our specific read-only user
-        "read list" = "sambaro";
+        "path"        = "/mnt/LinuxPart/Anime/";
+        "browseable"  = "yes";
+        "read only"   = "no";
+        "guest ok"    = "no";
+        "valid users" = "@wheel, sambaro";
+        "read list"   = "sambaro";
       };
-      
       "Movies" = {
-        "path" = "/mnt/LinuxPart/Movies/"; # Change this to your target shared directory path
-        "browseable" = "yes";
-        "read only" = "no"; # Local write control; restricted by user permissions below
-        "guest ok" = "no";
-        "valid users" = "@wheel, sambaro"; # Allow admin group and our specific read-only user
-        "read list" = "sambaro";
+        "path"        = "/mnt/LinuxPart/Movies/";
+        "browseable"  = "yes";
+        "read only"   = "no";
+        "guest ok"    = "no";
+        "valid users" = "@wheel, sambaro";
+        "read list"   = "sambaro";
       };
-
       "Transfer" = {
-        "path" = "/mnt/LinuxPart/Transfer/"; # Change this to your target shared directory path
-        "browseable" = "yes";
-        "read only" = "no"; # Local write control; restricted by user permissions below
-        "guest ok" = "no";
-        "valid users" = "@wheel, sambaro"; # Allow admin group and our specific read-only user
-        "read list" = "sambaro";
+        "path"        = "/mnt/LinuxPart/Transfer/";
+        "browseable"  = "yes";
+        "read only"   = "no";
+        "guest ok"    = "no";
+        "valid users" = "@wheel, sambaro";
+        "read list"   = "sambaro";
       };
     };
   };
 
-  # Optional: Enable WS-Discovery so Windows network discovery finds your shares automatically
+  # WS-Discovery — lets Windows auto-discover Samba shares on the network
   services.samba-wsdd = {
     enable = true;
     openFirewall = true;
   };
-  
-  # Enable Avahi for mDNS / DNS-SD discovery (Mac, Linux, and local hostname resolution)
+
+  # Avahi mDNS — .local hostname resolution for Mac/Linux clients
   services.avahi = {
     enable = true;
-    nssmdns4 = true; # Enables name resolution for .local domains
-    openFirewall = true; # Automatically opens the necessary UDP port 5353
+    nssmdns4 = true;
+    openFirewall = true;
   };
 
-  # RealtimeKit is needed for PipeWire to acquire real-time priority.
-  # This is what gives you that ultra-low latency for gaming.
-  security.rtkit.enable = true; 
-  
-  services.pipewire = {
-    enable = true;
-    
-    # ALSA is the lowest-level Linux sound architecture. 
-    # Enabling 32-bit support is mandatory because many older Steam games are 32-bit.
-    alsa.enable = true;
-    alsa.support32Bit = true; 
-    
-    # THIS is the magic line. It enables the PulseAudio server emulation.
-    # It gives you PulseAudio's stability and compatibility, powered by PipeWire.
-    pulse.enable = true;
-  };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.libinput.enable = true;
-
+  # ── Users ──────────────────────────────────────────────────────────────────
   users.users.mirkolouis = {
     isNormalUser = true;
-    description = "mirkolouis";
-    extraGroups = [ "networkmanager" "wheel" ]; 
+    description  = "mirkolouis";
+    extraGroups  = [ "networkmanager" "wheel" ];
   };
 
   users.users.sambaro = {
     isSystemUser = true;
-    group = "nogroup";
-    description = "Samba Read-Only User";
+    group        = "nogroup";
+    description  = "Samba Read-Only User";
   };
-  
-  #Fonts
+
+  # ── Fonts ──────────────────────────────────────────────────────────────────
   fonts.packages = with pkgs; [
-    # Nerd Fonts
+    # Nerd Fonts (terminal / coding)
     nerd-fonts.meslo-lg
     nerd-fonts.inconsolata
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
 
+    # General UI fonts
     inter
     gelasio
-    open-sans 
+    open-sans
     rubik
- 
-    corefonts    # Microsoft Core Fonts
-    vista-fonts  # Fonts from Vista
+
+    corefonts   # Microsoft Core Fonts
+    vista-fonts # Fonts from Windows Vista
   ];
 
-  #Programs
-  programs.firefox.enable = true;
-  programs.gamemode.enable = true;
+  # ── Programs ───────────────────────────────────────────────────────────────
+  programs.firefox.enable   = true;
+  programs.gamemode.enable  = true; # Boosts CPU/GPU performance on demand for games
+
   programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true; 
+    enable                       = true;
+    remotePlay.openFirewall      = true;
     dedicatedServer.openFirewall = true;
-    gamescopeSession.enable = true; # Highly recommended for Wayland compositor gaming
+    gamescopeSession.enable      = true; # Wayland-native compositor for gaming
   };
+
   programs.appimage = {
     enable = true;
-    binfmt = true;
-  };  
-  
-  services.flatpak.enable = true;
-  
-  nixpkgs.config.allowUnfree = true;
+    binfmt = true; # Run AppImages directly without manual mounting
+  };
 
-  # List packages installed in system profile.
-  # You can use https://search.nixos.org/ to find more packages (and options).
+  services.flatpak.enable = true;
+
+  # Programs that need SUID wrappers or run in user sessions
+  # programs.mtr.enable = true;
+  # programs.gnupg.agent = {
+  #   enable = true;
+  #   enableSSHSupport = true;
+  # };
+
+  # ── System Packages ────────────────────────────────────────────────────────
   environment.systemPackages = with pkgs; [
+    # Core utilities
     distrobox
     wget
     git
     nomacs
     fastfetch
     kitty
-    
-    # Game Launchers & Managers
-    heroic       # Open-source Epic/GOG launcher
-    lutris       # Universal game manager
-    bottles      # Wine/Proton prefix manager
-    protonup-qt  # Added for GE-Proton management
-    mangohud     # Performance Overlay
 
-    # KDE
+    # Game launchers & managers
+    heroic      # Open-source Epic / GOG launcher
+    lutris      # Universal game manager
+    bottles     # Wine / Proton prefix manager
+    protonup-qt # GE-Proton version manager
+    mangohud    # In-game performance overlay
+
+    # KDE applications
     kdePackages.dolphin
     kdePackages.kate
     kdePackages.ark
@@ -291,47 +276,34 @@ in
     kdePackages.filelight
   ];
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
+  # ── Services ───────────────────────────────────────────────────────────────
 
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
+  # Enable the OpenSSH daemon
   # services.openssh.enable = true;
 
-  # Open ports in the firewall.
+  # Open ports in the firewall
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
+  # Or disable the firewall altogether
   # networking.firewall.enable = false;
 
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
+  # Enable CUPS to print documents
+  # services.printing.enable = true;
+
+  # Enable touchpad support (enabled by default in most desktopManagers)
+  # services.libinput.enable = true;  # Enable CUPS to print documents
+  # services.printing.enable = true;
+
+  # Enable touchpad support (enabled by default in most desktopManagers)
+  # services.libinput.enable = true;
+
+  # Copy config to /run/current-system/configuration.nix (useful as a backup)
   # system.copySystemConfiguration = true;
 
-  # This option defines the first version of NixOS you have installed on this particular machine,
-  # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
-  #
-  # Most users should NEVER change this value after the initial install, for any reason,
-  # even if you've upgraded your system to a new NixOS release.
-  #
-  # This value does NOT affect the Nixpkgs version your packages and OS are pulled from,
-  # so changing it will NOT upgrade your system - see https://nixos.org/manual/nixos/stable/#sec-upgrading for how
-  # to actually do that.
-  #
-  # This value being lower than the current NixOS release does NOT mean your system is
-  # out of date, out of support, or vulnerable.
-  #
-  # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
-  # and migrated your data accordingly.
-  #
-  # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  system.stateVersion = "26.05"; # Did you read the comment?
-
+  # ── System Version ─────────────────────────────────────────────────────────
+  # This defines the first NixOS version installed on this machine.
+  # Used to maintain compatibility with application data from older versions.
+  # Do NOT change this value after the initial install — it does NOT control
+  # which nixpkgs version you get. See: https://nixos.org/manual/nixos/stable/
+  system.stateVersion = "26.05";
 }
