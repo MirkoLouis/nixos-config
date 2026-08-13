@@ -131,6 +131,13 @@ in
 
   # KDE Plasma 6 desktop (Wayland session)
   services.desktopManager.plasma6.enable = true;
+
+  # Hyprland
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
+
   services.displayManager.defaultSession = lib.mkForce "plasma";
 
   # ── Audio ──────────────────────────────────────────────────────────────────
