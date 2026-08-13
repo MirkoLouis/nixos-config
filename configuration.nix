@@ -7,9 +7,27 @@
 let
   # SDDM astronaut theme with custom background video and login box position
   custom-astronaut = pkgs.sddm-astronaut.override {
+    embeddedTheme = "japanese_aesthetic";
     themeConfig = {
+      Font         = "MatrixType";
       FormPosition = "right";
-      Background = "${./login-video.mp4}";
+      Background   = "${./login-video.mp4}";
+      HourFormat   = "h:mm";
+      DateFormat   = "dddd";
+
+      # White text overrides
+      HeaderTextColor                  = "#ffffff";
+      DateTextColor                    = "#ffffff";
+      TimeTextColor                    = "#ffffff";
+      LoginFieldTextColor              = "#ffffff";
+      PasswordFieldTextColor           = "#ffffff";
+      UserIconColor                    = "#ffffff";
+      PasswordIconColor                = "#ffffff";
+      PlaceholderTextColor             = "#cccccc";
+      WarningColor                     = "#ffffff";
+      SystemButtonsIconsColor          = "#ffffff";
+      SessionButtonTextColor           = "#ffffff";
+      VirtualKeyboardButtonTextColor   = "#ffffff";
     };
   };
 in
@@ -39,12 +57,12 @@ in
   # TTY / virtual console settings
   # Note: TTY fonts must be PSF (bitmap) format — TTF fonts like Nerd Fonts
   # cannot be used here. Terminus is the best-looking monospaced PSF option.
-  console = {
-    earlySetup = true;    # Apply font from the very first boot message
-    font = "ter-v24n";    # Terminus 32px — clean and sharp on modern displays
-    keyMap = "us";
-    packages = [ pkgs.terminus_font ];
-  };
+  #console = {
+    #earlySetup = true;    # Apply font from the very first boot message
+    #font = "ter-v24n";    # Terminus 32px — clean and sharp on modern displays
+    #keyMap = "us";
+    #packages = [ pkgs.terminus_font ];
+  #};
 
   # ── Nix Settings ───────────────────────────────────────────────────────────
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -93,17 +111,6 @@ in
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
 
   # ── Display & Desktop ──────────────────────────────────────────────────────
-
-  # Wayland + NVIDIA environment variables
-  environment.sessionVariables = {
-    NIXOS_OZONE_WL              = "1";      # Force Wayland for GTK/Qt/Electron apps
-    XDG_SESSION_TYPE            = "wayland";
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
-    LIBVA_DRIVER_NAME           = "nvidia"; # VA-API via NVIDIA
-    GBM_BACKEND                 = "nvidia-drm";
-    __GLX_VENDOR_LIBRARY_NAME   = "nvidia";
-    NVD_BACKEND                 = "direct";
-  };
 
   # SDDM login manager with astronaut theme
   services.displayManager.sddm = {
@@ -223,6 +230,12 @@ in
 
     corefonts   # Microsoft Core Fonts
     vista-fonts # Fonts from Windows Vista
+
+    # Custom Electroharmonix font derivation
+    (runCommand "custom-sddm-font" {} ''
+      mkdir -p $out/share/fonts/truetype
+      cp ${./MatrixType-Regular.ttf} $out/share/fonts/truetype/
+    '')
   ];
 
   # ── Programs ───────────────────────────────────────────────────────────────
@@ -259,6 +272,8 @@ in
     nomacs
     fastfetch
     kitty
+    cava
+    clamav      # Open source virus scanner
 
     # Game launchers & managers
     heroic      # Open-source Epic / GOG launcher
@@ -277,6 +292,8 @@ in
   ];
 
   # ── Services ───────────────────────────────────────────────────────────────
+
+  services.clamav.updater.enable = true;
 
   # Enable the OpenSSH daemon
   # services.openssh.enable = true;
