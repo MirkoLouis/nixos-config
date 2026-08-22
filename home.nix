@@ -3,27 +3,133 @@
 {
   home.username = "mirkolouis";
   home.homeDirectory = "/home/mirkolouis";
-
-  # State version for Home Manager
   home.stateVersion = "24.05";
+  programs.home-manager.enable = true;
 
-  # Install the actual binaries required by the 43PR dotfiles
-  home.packages = with pkgs; [
-    waybar
-    rofi
-    wlogout
-    awww # commonly used in these rice setups for wallpapers, adjust if they use hyprpaper
-    wl-clipboard # needed for copy/paste in Wayland
-  ];
-
-  # Symlink specific directories from the raw GitHub input to ~/.config
-  xdg.configFile = {
-    "hypr".source = "${inputs.dotfiles-43pr}/.config/hypr";
-    "wlogout".source = "${inputs.dotfiles-43pr}/.config/wlogout";
-    "rofi".source = "${inputs.dotfiles-43pr}/.config/rofi";
-    "waybar".source = "${inputs.dotfiles-43pr}/.config/waybar";
+  programs.fastfetch = {
+    enable = true;
+    settings = {
+      logo = {
+        source = "/home/mirkolouis/Projects/frover.txt";
+        type = "file";
+        padding = {
+          top = 2;
+          left = 2;
+        };
+      };
+      modules = [
+        "title"
+        "separator"
+        "os"
+        "host"
+        "kernel"
+        "uptime"
+        "packages"
+        "shell"
+        "display"
+        "de"
+        "wm"
+        "wmtheme"
+        "theme"
+        "icons"
+        "font"
+        "cursor"
+        "terminal"
+        "terminalfont"
+        "cpu"
+        "gpu"
+        "memory"
+        "swap"
+        "disk"
+        "localip"
+        "locale"
+        "break"
+        "colors"
+      ];
+    };
   };
 
-  # Let Home Manager install and manage itself
-  programs.home-manager.enable = true;
+  programs.kitty = {
+    enable = true;
+    font = {
+      name = "Inconsolata Nerd Font Mono";
+      size = 12;
+    };
+    settings = {
+      shell = "fish";
+      # Cursor Customization
+      cursor_trail = 3;
+      cursor_trail_decay = "0.1 0.2";
+      cursor_trail_start_threshold = 2;
+
+      # Window Layout & QOL
+      confirm_os_window_close = 0;
+      window_padding_width = 8;
+      remember_window_size = "yes";
+      initial_window_width = 640;
+      initial_window_height = 400;
+      enable_audio_bell = "no";
+
+      # Performance & Scrolling
+      touch_scroll_multiplier = "1.0";
+      wheel_scroll_multiplier = "5.0";
+      sync_to_monitor = "yes";
+
+      # Dracula Theme Configuration
+      foreground = "#f8f8f2";
+      background = "#282a36";
+      selection_foreground = "#ffffff";
+      selection_background = "#44475a";
+      url_color = "#8be9fd";
+      
+      color0  = "#21222c";
+      color8  = "#6272a4";
+      color1  = "#ff5555";
+      color9  = "#ff6e6e";
+      color2  = "#50fa7b";
+      color10 = "#69ff94";
+      color3  = "#f1fa8c";
+      color11 = "#ffffa5";
+      color4  = "#bd93f9";
+      color12 = "#d6acff";
+      color5  = "#ff79c6";
+      color13 = "#ff92df";
+      color6  = "#8be9fd";
+      color14 = "#a4ffff";
+      color7  = "#f8f8f2";
+      color15 = "#ffffff";
+      
+      cursor = "#f8f8f2";
+      cursor_text_color = "background";
+      
+      active_tab_foreground = "#282a36";
+      active_tab_background = "#f8f8f2";
+      inactive_tab_foreground = "#282a36";
+      inactive_tab_background = "#6272a4";
+      
+      mark1_foreground = "#282a36";
+      mark1_background = "#ff5555";
+      
+      active_border_color = "#f8f8f2";
+      inactive_border_color = "#6272a4";
+    };
+  };
+
+  xdg.configFile."fish/conf.d/custom_init.fish".text = ''
+    if status is-interactive
+        set -g fish_greeting
+        fastfetch
+    end
+
+    # Custom NixOS aliases
+    alias nixos-update="sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
+    alias nixos-upgrade="sudo nix flake update --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
+    alias nixos-bios="systemctl reboot --firmware-setup"
+    alias nixos-cleanup="sudo nix-collect-garbage --delete-older-than 7d"
+    alias nixos-optimize="sudo nix store optimise"
+  '';
+
+  home.sessionPath = [
+    "/home/mirkolouis/.local/bin"
+  ];
 }

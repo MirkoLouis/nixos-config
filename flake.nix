@@ -5,16 +5,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 
-    # Add Home Manager
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Add the target dotfiles repository
-    dotfiles-43pr = {
-      url = "github:43PR/dotfiles";
-      flake = false;
     };
   };
 
@@ -27,14 +20,18 @@
           ./configuration.nix
           chaotic.nixosModules.default
 
-          # Initialize Home Manager as a NixOS module
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            # Pass inputs to Home Manager modules
             home-manager.extraSpecialArgs = { inherit inputs; };
-            home-manager.users.mirkolouis = import ./home.nix;
+            home-manager.backupFileExtension = "bak";
+            
+            home-manager.users.mirkolouis = {
+              imports = [
+                ./home.nix
+              ];
+            };
           }
         ];
       };

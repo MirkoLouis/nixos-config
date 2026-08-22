@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 let
   # SDDM astronaut theme with custom background video and login box position
@@ -15,7 +15,6 @@ let
       HourFormat   = "h:mm";
       DateFormat   = "dddd";
 
-      # White text overrides
       HeaderTextColor                  = "#ffffff";
       DateTextColor                    = "#ffffff";
       TimeTextColor                    = "#ffffff";
@@ -37,12 +36,12 @@ in
   # ── Boot & Kernel ──────────────────────────────────────────────────────────
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.linuxPackages_cachyos; # CachyOS performance-optimized kernel
-  boot.supportedFilesystems = [ "ntfs" ];           # Enable NTFS (Windows partition support)
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  boot.supportedFilesystems = [ "ntfs" ];
 
   # ── Networking ─────────────────────────────────────────────────────────────
   networking.hostName = "MirkoInNIXOS";
-  networking.networkmanager.enable = true; # Manage connections via nmcli / nmtui
+  networking.networkmanager.enable = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -93,7 +92,10 @@ in
   };
 
   # NVIDIA Prime (Intel iGPU + NVIDIA dGPU hybrid graphics)
-  hardware.graphics.enable = true;
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
     modesetting.enable = true;
@@ -131,14 +133,6 @@ in
 
   # KDE Plasma 6 desktop (Wayland session)
   services.desktopManager.plasma6.enable = true;
-
-  # Hyprland
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;
-  };
-
-  services.displayManager.defaultSession = lib.mkForce "plasma";
 
   # ── Audio ──────────────────────────────────────────────────────────────────
   security.rtkit.enable = true; # Allows PipeWire to acquire real-time priority
@@ -213,6 +207,7 @@ in
     isNormalUser = true;
     description  = "mirkolouis";
     extraGroups  = [ "networkmanager" "wheel" ];
+    shell = pkgs.fish;
   };
 
   users.users.sambaro = {
@@ -228,17 +223,18 @@ in
     nerd-fonts.inconsolata
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
+    nerd-fonts.caskaydia-cove
 
     # General UI fonts
     inter
     gelasio
     open-sans
     rubik
+    iosevka
 
     corefonts   # Microsoft Core Fonts
     vista-fonts # Fonts from Windows Vista
 
-    # Custom Electroharmonix font derivation
     (runCommand "custom-sddm-font" {} ''
       mkdir -p $out/share/fonts/truetype
       cp ${./MatrixType-Regular.ttf} $out/share/fonts/truetype/
@@ -261,6 +257,8 @@ in
     binfmt = true; # Run AppImages directly without manual mounting
   };
 
+  programs.fish.enable = true;
+
   services.flatpak.enable = true;
 
   # Programs that need SUID wrappers or run in user sessions
@@ -279,13 +277,16 @@ in
     nomacs
     fastfetch
     kitty
-    cava
-    clamav      # Open source virus scanner
+    clamav
+    jq
+    imagemagick
+    nautilus
+    gnome-disk-utility
+    bazaar
 
     # Game launchers & managers
     heroic      # Open-source Epic / GOG launcher
     lutris      # Universal game manager
-    bottles     # Wine / Proton prefix manager
     protonup-qt # GE-Proton version manager
     mangohud    # In-game performance overlay
 
@@ -301,6 +302,10 @@ in
   # ── Services ───────────────────────────────────────────────────────────────
 
   services.clamav.updater.enable = true;
+
+  services.gvfs.enable = true;
+
+  services.udisks2.enable = true;
 
   # Enable the OpenSSH daemon
   # services.openssh.enable = true;
