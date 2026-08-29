@@ -9,6 +9,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, chaotic, home-manager, ... }@inputs: {
@@ -17,6 +22,7 @@
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
+          inputs.lanzaboote.nixosModules.lanzaboote
           ./configuration.nix
           chaotic.nixosModules.default
 
@@ -26,11 +32,11 @@
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = { inherit inputs; };
             home-manager.backupFileExtension = "bak";
-            
+
             home-manager.users.mirkolouis = {
               imports = [
                 ./home.nix
-              ];
+              ];              
             };
           }
         ];

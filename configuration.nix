@@ -1,11 +1,6 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
 { config, lib, pkgs, inputs, ... }:
 
 let
-  # SDDM astronaut theme with custom background video and login box position
   custom-astronaut = pkgs.sddm-astronaut.override {
     embeddedTheme = "japanese_aesthetic";
     themeConfig = {
@@ -34,10 +29,20 @@ in
   imports = [ ./hardware-configuration.nix ];
 
   # ── Boot & Kernel ──────────────────────────────────────────────────────────
-  boot.loader.systemd-boot.enable = true;
+  #boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  boot.kernelPackages = pkgs.linuxPackages_cachyos-lts.cachyOverride {
+    cachyVars = pkgs.linuxPackages_cachyos-lts.kernel.cachyConfig.cachyVars // { 
+      "_processor_opt" = "GENERIC_V4"; 
+    };
+  };
   boot.supportedFilesystems = [ "ntfs" ];
+
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
+  };
 
   # ── Networking ─────────────────────────────────────────────────────────────
   networking.hostName = "MirkoInNIXOS";
@@ -99,8 +104,9 @@ in
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
     modesetting.enable = true;
-    open = false;          # Use proprietary driver
-    nvidiaSettings = true; # Enable nvidia-settings GUI
+    open = false;
+    nvidiaSettings = true;
+    package = pkgs.nvidia_cachyos-lts;
     prime = {
       sync.enable = true;
       intelBusId  = "PCI:0:2:0";
@@ -133,6 +139,8 @@ in
 
   # KDE Plasma 6 desktop (Wayland session)
   services.desktopManager.plasma6.enable = true;
+
+  programs.hyprland.enable = true;
 
   # ── Audio ──────────────────────────────────────────────────────────────────
   security.rtkit.enable = true; # Allows PipeWire to acquire real-time priority
@@ -224,6 +232,8 @@ in
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
     nerd-fonts.caskaydia-cove
+    nerd-fonts.ubuntu
+    nerd-fonts.jetbrains-mono
 
     # General UI fonts
     inter
@@ -274,15 +284,35 @@ in
     distrobox
     wget
     git
+    killall
     nomacs
     fastfetch
     kitty
     clamav
-    jq
     imagemagick
     nautilus
+    gnome-text-editor
     gnome-disk-utility
+    evince
     bazaar
+    wineWow64Packages.waylandFull
+    cliamp
+
+    # Hyprland
+    dunst	# notification daemon
+    ashell	# status bar
+    jq		# ashell dependency
+    pavucontrol	# pulseaudio volume control gui
+    pwvucontrol	# piprewire volume control gui
+    blueman	# bluetooth manager
+    networkmanagerapplet # gui for nmcli
+    walker	# application launcher
+    elephant	# walker's backend
+    rofi	# frontend wallpaper switcher
+    awww	# backend wallpaper switcher
+    imagemagick # required for caching wallpapers
+    hypridle	# hyprland idle?
+    brightnessctl # cli for brightness
 
     # Game launchers & managers
     heroic      # Open-source Epic / GOG launcher
@@ -306,6 +336,11 @@ in
   services.gvfs.enable = true;
 
   services.udisks2.enable = true;
+
+  services.scx.enable = true;
+
+  # For hyprland
+  services.geoclue2.enable = true;
 
   # Enable the OpenSSH daemon
   # services.openssh.enable = true;

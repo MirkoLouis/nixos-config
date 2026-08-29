@@ -65,9 +65,9 @@
       # Window Layout & QOL
       confirm_os_window_close = 0;
       window_padding_width = 8;
-      remember_window_size = "yes";
-      initial_window_width = 640;
-      initial_window_height = 400;
+      remember_window_size = "no";
+      initial_window_width = 1280;
+      initial_window_height = 720;
       enable_audio_bell = "no";
 
       # Performance & Scrolling
@@ -118,17 +118,20 @@
   xdg.configFile."fish/conf.d/custom_init.fish".text = ''
     if status is-interactive
         set -g fish_greeting
-        fastfetch
     end
 
     # Custom NixOS aliases
     alias nixos-update="sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
     alias nixos-upgrade="sudo nix flake update --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
+    
+    # Safely updates standard system packages while ignoring Chaotic-Nyx (kernel) updates
+    alias nixos-upgrade-safe="sudo nix flake update nixpkgs home-manager --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
+    
     alias nixos-bios="systemctl reboot --firmware-setup"
     alias nixos-cleanup="sudo nix-collect-garbage --delete-older-than 7d"
     alias nixos-optimize="sudo nix store optimise"
   '';
-
+  
   home.sessionPath = [
     "/home/mirkolouis/.local/bin"
   ];
