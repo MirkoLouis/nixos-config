@@ -37,6 +37,9 @@ in
       "_processor_opt" = "GENERIC_V4"; 
     };
   };
+
+  boot.kernelParams = [ "split_lock_detect=off" "nvidia.NVreg_EnableWayland=1" ];
+
   boot.supportedFilesystems = [ "ntfs" ];
 
   boot.lanzaboote = {
@@ -117,6 +120,33 @@ in
   # Configure keymap in X11 (uncomment to override)
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
+
+  # ── Swap & Memory Management (Gaming Optimized) ────────────────────────────
+
+  # 1. High-Priority In-Memory Compressed Swap
+  zramSwap = {
+    enable = true;
+    priority = 100;
+    memoryPercent = 50;  # Allows up to 8GB of your RAM to be used for compression
+    algorithm = "zstd";  # Zstandard offers the best compression-to-CPU-cost ratio
+  };
+
+  # 2. Low-Priority Physical Swapfile on NVMe Root (/)
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 8192;      # 8 GB allocated on the NVMe
+      priority = 10;    # Only used if zRAM is completely exhausted
+    }
+  ];
+
+  # 3. Kernel Tuning for zRAM and Gaming Responsiveness
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 100; 
+    "vm.watermark_boost_factor" = 0;
+    "vm.watermark_scale_factor" = 125;
+    "vm.page-cluster" = 0;
+  };
 
   # ── Display & Desktop ──────────────────────────────────────────────────────
 
@@ -297,6 +327,7 @@ in
     bazaar
     wineWow64Packages.waylandFull
     cliamp
+    gimp
 
     # Hyprland
     dunst	# notification daemon
@@ -304,7 +335,7 @@ in
     jq		# ashell dependency
     pavucontrol	# pulseaudio volume control gui
     pwvucontrol	# piprewire volume control gui
-    blueman	# bluetooth manager
+    overskride	# bluetooth manager
     networkmanagerapplet # gui for nmcli
     walker	# application launcher
     elephant	# walker's backend
@@ -337,10 +368,10 @@ in
 
   services.udisks2.enable = true;
 
-  services.scx.enable = true;
-
-  # For hyprland
-  services.geoclue2.enable = true;
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
 
   # Enable the OpenSSH daemon
   # services.openssh.enable = true;

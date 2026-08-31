@@ -1,6 +1,9 @@
 { config, pkgs, inputs, ... }:
 
 {
+
+  imports = [ ./fish-db-functions.nix ];
+
   home.username = "mirkolouis";
   home.homeDirectory = "/home/mirkolouis";
   home.stateVersion = "24.05";
@@ -131,8 +134,19 @@
     alias nixos-cleanup="sudo nix-collect-garbage --delete-older-than 7d"
     alias nixos-optimize="sudo nix store optimise"
   '';
+
+  xdg.configFile."electron-flags.conf".text = ''
+    --enable-features=UseOzonePlatform
+    --ozone-platform=wayland
+  '';
+
+  home.sessionVariables = {
+    BUN_INSTALL = "/home/mirkolouis/.bun";
+    NIXOS_OZONE_WL = "1";
+  };
   
   home.sessionPath = [
     "/home/mirkolouis/.local/bin"
+    "/home/mirkolouis/.bun/bin"
   ];
 }
