@@ -38,7 +38,7 @@ in
     };
   };
 
-  boot.kernelParams = [ "split_lock_detect=off" "nvidia.NVreg_EnableWayland=1" ];
+  boot.kernelParams = [ "split_lock_detect=off" ];
 
   boot.supportedFilesystems = [ "ntfs" ];
 
@@ -111,7 +111,9 @@ in
     nvidiaSettings = true;
     package = pkgs.nvidia_cachyos-lts;
     prime = {
-      sync.enable = true;
+      sync.enable = false;
+      offload.enable = true;
+      offload.enableOffloadCmd = true;
       intelBusId  = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
     };
@@ -164,6 +166,14 @@ in
       kdePackages.qtsvg
       kdePackages.qtvirtualkeyboard
       kdePackages.qtmultimedia
+    ];
+  };
+
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk
     ];
   };
 
@@ -321,6 +331,10 @@ in
     clamav
     imagemagick
     nautilus
+    ffmpeg
+    ffmpegthumbnailer
+    totem
+    gst_all_1.gstreamer
     gnome-text-editor
     gnome-disk-utility
     evince
