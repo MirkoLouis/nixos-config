@@ -1,7 +1,6 @@
 { config, pkgs, inputs, ... }:
 
 {
-
   imports = [ ./fish-db-functions.nix ];
 
   home.username = "mirkolouis";
@@ -115,6 +114,46 @@
       
       active_border_color = "#f8f8f2";
       inactive_border_color = "#6272a4";
+    };
+  };
+
+  services.dunst = {
+    enable = true;
+    settings = {
+      global = {
+        background = "#282a36";
+        foreground = "#f8f8f2";
+        frame_color = "#bd93f9"; 
+        separator_color = "frame";
+        separator_height = 11;
+        font = "Inconsolata Nerd Font Mono 12";
+        fullscreen = "pushback"; 
+        follow = "keyboard"; 
+      };
+
+      urgency_low = {
+        background = "#282a36";
+        foreground = "#f8f8f2";
+        frame_color = "#50fa7b";
+        highlight = "#50fa7b";
+        timeout = 4;
+      };
+
+      urgency_normal = {
+        background = "#282a36";
+        foreground = "#f8f8f2";
+        frame_color = "#f1fa8c";
+        highlight = "#f1fa8c";
+        timeout = 6;
+      };
+
+      urgency_critical = {
+        background = "#282a36";
+        foreground = "#f8f8f2";
+        frame_color = "#ff5555";
+        highlight = "#ff5555";
+        timeout = 0;
+      };
     };
   };
 

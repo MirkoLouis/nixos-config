@@ -32,7 +32,7 @@ in
   #boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.linuxPackages_cachyos-lts.cachyOverride {
+  boot.kernelPackages = pkgs.linuxPackages_cachyos.cachyOverride {
     cachyVars = pkgs.linuxPackages_cachyos-lts.kernel.cachyConfig.cachyVars // { 
       "_processor_opt" = "GENERIC_V4"; 
     };
@@ -109,13 +109,17 @@ in
     modesetting.enable = true;
     open = false;
     nvidiaSettings = true;
-    package = pkgs.nvidia_cachyos-lts;
+    package = pkgs.nvidia_cachyos;
     prime = {
       sync.enable = false;
       offload.enable = true;
       offload.enableOffloadCmd = true;
       intelBusId  = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
+    };
+    powerManagement = {
+      enable = true;
+      finegrained = true;
     };
   };
 
@@ -144,7 +148,7 @@ in
 
   # 3. Kernel Tuning for zRAM and Gaming Responsiveness
   boot.kernel.sysctl = {
-    "vm.swappiness" = 100; 
+    "vm.swappiness" = 50; 
     "vm.watermark_boost_factor" = 0;
     "vm.watermark_scale_factor" = 125;
     "vm.page-cluster" = 0;
@@ -383,8 +387,7 @@ in
   services.udisks2.enable = true;
 
   services.scx = {
-    enable = true;
-    scheduler = "scx_lavd";
+    enable = false;
   };
 
   # Enable the OpenSSH daemon
