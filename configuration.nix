@@ -29,7 +29,8 @@ in
   imports = [ ./hardware-configuration.nix ];
 
   # ── Boot & Kernel ──────────────────────────────────────────────────────────
-  #boot.loader.systemd-boot.enable = true;
+  # systemd-boot must stay OFF — lanzaboote (Secure Boot) replaces it below.
+  boot.loader.systemd-boot.enable = false;
   boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_cachyos.cachyOverride {
@@ -84,11 +85,13 @@ in
   fileSystems."/mnt/LinuxPart" = {
     device = "/dev/disk/by-uuid/015337c8-827b-452d-aa39-74d2745d95c5";
     fsType = "ext4";
+    options = [ "nofail" "noauto" "x-systemd.automount" ];
   };
+
   fileSystems."/mnt/WindowsPart" = {
     device = "/dev/disk/by-uuid/921072191072048F";
     fsType = "ntfs-3g";
-    options = [ "rw" "uid=1000" "gid=100" "dmask=0022" "fmask=0022" ];
+    options = [ "rw" "uid=1000" "gid=100" "dmask=0022" "fmask=0022" "nofail" "noauto" "x-systemd.automount" ];
   };
 
   # ── Hardware ───────────────────────────────────────────────────────────────
@@ -96,7 +99,7 @@ in
   # Bluetooth
   hardware.bluetooth = {
     enable = true;
-    powerOnBoot = true;
+    powerOnBoot = false;
   };
 
   # NVIDIA Prime (Intel iGPU + NVIDIA dGPU hybrid graphics)
@@ -107,7 +110,7 @@ in
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
     modesetting.enable = true;
-    open = false;
+    open = true; # Open source drivers?
     nvidiaSettings = true;
     package = pkgs.nvidia_cachyos;
     prime = {
@@ -174,17 +177,22 @@ in
   };
 
   xdg.portal = {
-    enable = true;
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-hyprland
-      xdg-desktop-portal-gtk
-    ];
+    config = {
+      hyprland = {
+        default = [ "gtk" "hyprland" ];
+        "org.freedesktop.impl.portal.FileChooser" = "gtk";
+      };
+    };
   };
+
+  programs.dconf.enable = true;
 
   # KDE Plasma 6 desktop (Wayland session)
   services.desktopManager.plasma6.enable = true;
 
-  programs.hyprland.enable = true;
+  programs.hyprland = {
+    enable = true;
+  };
 
   # ── Audio ──────────────────────────────────────────────────────────────────
   security.rtkit.enable = true; # Allows PipeWire to acquire real-time priority
@@ -325,27 +333,35 @@ in
   # ── System Packages ────────────────────────────────────────────────────────
   environment.systemPackages = with pkgs; [
     # Core utilities
-    distrobox
-    wget
-    git
-    killall
-    nomacs
-    fastfetch
-    kitty
-    clamav
-    imagemagick
-    nautilus
-    ffmpeg
-    ffmpegthumbnailer
-    totem
-    gst_all_1.gstreamer
-    gnome-text-editor
-    gnome-disk-utility
-    evince
-    bazaar
+    distrobox	# Distro Virtualization
+    wget	# for downloading from internet
+    git		# for github
+    killall	# kill but everyone
+    nomacs	# Photo Viewer
+    fastfetch	# ofcourse
+    kitty	# Terminal
+    clamav	# Open Source Antivirus
+    imagemagick # Terminal Image Tool
+    nautilus	# File Manager
+    ffmpeg	# Dependency for Nautilus
+    ffmpegthumbnailer # Dependency for Nautilus
+    totem 	# Dependency for Nautilus
+    gst_all_1.gstreamer # Dependency for Nautilus
+    gnome-text-editor  # Text Editor
+    gnome-disk-utility # Disks GUI
+    evince	# PDF Viewer
+    bazaar	# Flatpak Store
     wineWow64Packages.waylandFull
-    cliamp
-    gimp
+    cliamp	# Terminal Music Player
+    krita	# Photo Editor
+    scribus	# Indesign Native Alternative
+    unrar	# for .rar support
+    p7zip
+    arj
+    zstd
+    lzop
+    lrzip
+    libnotify
 
     # Hyprland
     dunst	# notification daemon
@@ -362,12 +378,17 @@ in
     imagemagick # required for caching wallpapers
     hypridle	# hyprland idle?
     brightnessctl # cli for brightness
+    hyprshot
+    grim
 
-    # Game launchers & managers
+    # Gaming
     heroic      # Open-source Epic / GOG launcher
     lutris      # Universal game manager
     protonup-qt # GE-Proton version manager
     mangohud    # In-game performance overlay
+    bottles
+    protontricks
+    winetricks
 
     # KDE applications
     kdePackages.dolphin
@@ -376,6 +397,7 @@ in
     kdePackages.okular
     kdePackages.kfind
     kdePackages.filelight
+    kdePackages.kdenlive
   ];
 
   # ── Services ───────────────────────────────────────────────────────────────
@@ -389,6 +411,25 @@ in
   services.scx = {
     enable = false;
   };
+
+  systemd.services.unblock-bluetooth = {
+    description = "Forcefully unblock Bluetooth on boot";
+    wantedBy = [ "multi-user.target" ];
+    # Wait for the built-in rfkill cache to finish restoring first
+    after = [ "bluetooth.service" "systemd-rfkill.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      # Add a 3-second delay to guarantee all kernel modules have settled
+      ExecStartPre = "${pkgs.coreutils}/bin/sleep 3";
+      ExecStart = "${pkgs.util-linux}/bin/rfkill unblock bluetooth";
+      RemainAfterExit = true;
+    };
+  };
+
+  # For HE Keyboard to be recognized in Chromium Browsers
+  services.udev.extraRules = ''
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666", TAG+="uaccess"
+  '';
 
   # Enable the OpenSSH daemon
   # services.openssh.enable = true;
@@ -405,9 +446,6 @@ in
   # Enable touchpad support (enabled by default in most desktopManagers)
   # services.libinput.enable = true;  # Enable CUPS to print documents
   # services.printing.enable = true;
-
-  # Enable touchpad support (enabled by default in most desktopManagers)
-  # services.libinput.enable = true;
 
   # Copy config to /run/current-system/configuration.nix (useful as a backup)
   # system.copySystemConfiguration = true;

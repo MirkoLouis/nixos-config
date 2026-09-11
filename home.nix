@@ -1,7 +1,9 @@
 { config, pkgs, inputs, ... }:
 
 {
-  imports = [ ./fish-db-functions.nix ];
+  imports = [ 
+    ./fish-db-functions.nix 
+  ];
 
   home.username = "mirkolouis";
   home.homeDirectory = "/home/mirkolouis";
@@ -182,6 +184,7 @@
   home.sessionVariables = {
     BUN_INSTALL = "/home/mirkolouis/.bun";
     NIXOS_OZONE_WL = "1";
+    GTK_USE_PORTAL = "1";
   };
   
   home.sessionPath = [
