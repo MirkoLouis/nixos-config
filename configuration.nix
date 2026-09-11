@@ -30,7 +30,7 @@ in
 
   # ── Boot & Kernel ──────────────────────────────────────────────────────────
   # systemd-boot must stay OFF — lanzaboote (Secure Boot) replaces it below.
-  boot.loader.systemd-boot.enable = false;
+  #boot.loader.systemd-boot.enable = false;
   boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_cachyos.cachyOverride {
