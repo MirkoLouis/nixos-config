@@ -205,7 +205,9 @@ in
 
   # ── Virtualisation ─────────────────────────────────────────────────────────
   virtualisation.podman.enable = true;
-  virtualisation.containers.registries.search = [ "docker.io" ];
+  virtualisation.containers.registries.settings = {
+    unqualified-search-registries = [ "docker.io" ];
+  };
 
   # ── Network Sharing ────────────────────────────────────────────────────────
 
@@ -387,7 +389,9 @@ in
     grim	# for all screens screenshot support
     hyprviz	# gui way to setup hyprland
     hyprpolkitagent	# for apps to request sudo acess
-    hyprpwcenter	# pipewire volume control gui by hypr
+    wallust	# another color picker
+    cliphist
+    wl-clipboard
 
     # Gaming
     heroic      # Open-source Epic / GOG launcher

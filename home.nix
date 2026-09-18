@@ -10,6 +10,21 @@
   home.stateVersion = "24.05";
   programs.home-manager.enable = true;
 
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+    };
+  };
+
+  gtk = {
+    enable = true;
+    theme = {
+      name = "Dracula";
+      package = pkgs.dracula-theme;
+    };
+    gtk4.theme = config.gtk.theme;
+  };
+
   programs.fastfetch = {
     enable = true;
     settings = {
@@ -116,6 +131,9 @@
       
       active_border_color = "#f8f8f2";
       inactive_border_color = "#6272a4";
+
+      allow_remote_control = "yes";
+      listen_on = "unix:/tmp/kitty-{kitty_pid}.sock";
     };
   };
 
@@ -197,6 +215,7 @@
     BUN_INSTALL = "/home/mirkolouis/.bun";
     NIXOS_OZONE_WL = "1";
     GTK_USE_PORTAL = "1";
+    GTK_THEME = "Dracula";
   };
   
   home.sessionPath = [
