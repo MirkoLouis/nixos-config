@@ -160,20 +160,32 @@
   };
 
   xdg.configFile."fish/conf.d/custom_init.fish".text = ''
+    if not set -q CONTAINER_ID
+        fish_add_path /home/mirkolouis/.local/bin
+
+        # Custom NixOS aliases
+        alias nixos-update="sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
+        alias nixos-upgrade="sudo nix flake update --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
+        
+        # Safely updates standard system packages while ignoring Chaotic-Nyx (kernel) updates
+        alias nixos-upgrade-safe="sudo nix flake update nixpkgs home-manager --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
+        
+        alias nixos-bios="systemctl reboot --firmware-setup"
+        alias nixos-cleanup="sudo nix-collect-garbage --delete-older-than 7d"
+        alias nixos-optimize="sudo nix store optimise"
+    end
+
+    alias codium="codium --password-store=basic"
+
     if status is-interactive
         set -g fish_greeting
     end
 
-    # Custom NixOS aliases
-    alias nixos-update="sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
-    alias nixos-upgrade="sudo nix flake update --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
-    
-    # Safely updates standard system packages while ignoring Chaotic-Nyx (kernel) updates
-    alias nixos-upgrade-safe="sudo nix flake update nixpkgs home-manager --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
-    
-    alias nixos-bios="systemctl reboot --firmware-setup"
-    alias nixos-cleanup="sudo nix-collect-garbage --delete-older-than 7d"
-    alias nixos-optimize="sudo nix store optimise"
+    # History expansion (sudo !!)
+    function last_history_item
+        echo $history[1]
+    end
+    abbr -a !! --position anywhere --function last_history_item
   '';
 
   xdg.configFile."electron-flags.conf".text = ''

@@ -351,17 +351,22 @@ in
     gnome-disk-utility # Disks GUI
     evince	# PDF Viewer
     bazaar	# Flatpak Store
-    wineWow64Packages.waylandFull
+    wineWow64Packages.waylandFull	#wine
     cliamp	# Terminal Music Player
     krita	# Photo Editor
     scribus	# Indesign Native Alternative
     unrar	# for .rar support
-    p7zip
-    arj
-    zstd
-    lzop
-    lrzip
-    libnotify
+    p7zip	# archive library
+    arj		# archive library?
+    zstd	# archive library?
+    lzop	# archive library
+    lrzip	# archive library
+    libnotify	# send notification via notify-send
+    handbrake	# all-around media transcoder
+    apostrophe	# md file viewer
+    librewolf	# firefox fork
+    tailscale	# expanding lan to internet?
+    brave	# the one and only brave browser
 
     # Hyprland
     dunst	# notification daemon
@@ -378,17 +383,20 @@ in
     imagemagick # required for caching wallpapers
     hypridle	# hyprland idle?
     brightnessctl # cli for brightness
-    hyprshot
-    grim
+    hyprshot	# hyprland screenshotter
+    grim	# for all screens screenshot support
+    hyprviz	# gui way to setup hyprland
+    hyprpolkitagent	# for apps to request sudo acess
+    hyprpwcenter	# pipewire volume control gui by hypr
 
     # Gaming
     heroic      # Open-source Epic / GOG launcher
     lutris      # Universal game manager
     protonup-qt # GE-Proton version manager
     mangohud    # In-game performance overlay
-    bottles
-    protontricks
-    winetricks
+    bottles	# another game manager
+    protontricks	# a gui for winetricks
+    winetricks	# provides a cli to tweak wine prefixes
 
     # KDE applications
     kdePackages.dolphin
@@ -397,7 +405,6 @@ in
     kdePackages.okular
     kdePackages.kfind
     kdePackages.filelight
-    kdePackages.kdenlive
   ];
 
   # ── Services ───────────────────────────────────────────────────────────────
@@ -430,6 +437,9 @@ in
   services.udev.extraRules = ''
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666", TAG+="uaccess"
   '';
+
+  services.tailscale.enable = true;
+  systemd.services.tailscaled.wantedBy = lib.mkForce [];
 
   # Enable the OpenSSH daemon
   # services.openssh.enable = true;
