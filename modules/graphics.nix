@@ -25,6 +25,6 @@
       enable = true;
       finegrained = true;
     };
-    dynamicBoost.enable = true;
+    dynamicBoost.enable = false; # Did not work during testing
   };
 }

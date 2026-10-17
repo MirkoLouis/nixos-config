@@ -69,4 +69,31 @@
       userServices = true;
     };
   };
+  
+  # Run Samba only at home (home Wi-Fi by name, home ethernet by router MAC)
+  # networking.networkmanager.dispatcherScripts = [{
+  #   type = "basic";
+  #   source = pkgs.writeShellScript "samba-home-only" ''
+  #     [ "$2" = "up" ] || exit 0
+  #     home=no
+  #
+  #     # Wi-Fi: match by connection name
+  #     case "$CONNECTION_ID" in
+  #       "YourHomeWiFi"|"YourHomeWiFi5G") home=yes ;;
+  #     esac
+  #
+  #     # Ethernet: match by the router's MAC address
+  #     if [ "$DEVICE_IFACE" = "enp2s0" ] && [ -n "$IP4_GATEWAY" ]; then
+  #       ${pkgs.iputils}/bin/ping -c1 -W1 "$IP4_GATEWAY" >/dev/null 2>&1
+  #       gwmac=$(${pkgs.iproute2}/bin/ip neigh show "$IP4_GATEWAY" | ${pkgs.gawk}/bin/awk '{print $5}')
+  #       [ "$gwmac" = "e0:21:fe:17:c8:b0" ] && home=yes
+  #     fi
+  #
+  #     if [ "$home" = yes ]; then
+  #       ${pkgs.systemd}/bin/systemctl start samba.target
+  #     else
+  #       ${pkgs.systemd}/bin/systemctl stop samba.target
+  #     fi
+  #   '';
+  # }];
 }
