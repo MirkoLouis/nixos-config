@@ -4,8 +4,6 @@
   # ── System Packages ────────────────────────────────────────────────────────
   environment.systemPackages = with pkgs; [
     # Core utilities
-    distrobox	# Distro Virtualization
-    distroshelf	# GUI for distrobox
     wget	# for downloading from internet
     git		# for github
     killall	# kill but everyone
@@ -107,8 +105,6 @@
     enable = true;
     openFirewall = true;
   };
-
-  programs.virt-manager.enable = true;
 
   programs.wireshark = {
     enable  = true;

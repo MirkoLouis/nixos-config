@@ -7,32 +7,32 @@
     # ── Most edited ─────────────────────────────────────────────────────────
     ./modules/packages.nix        # environment.systemPackages + programs.*
 
-    # ── System ──────────────────────────────────────────────────────────────
-    ./modules/nix.nix             # flakes, garbage collection, unfree
-    ./modules/boot.nix            # bootloader, lanzaboote, CachyOS kernel
-    ./modules/locale.nix          # timezone, language, TTY console
-    ./modules/filesystems.nix     # extra mounts (LinuxPart, WindowsPart)
-    ./modules/memory.nix          # zram, swapfile, vm sysctl tuning
-    ./modules/security.nix        # sudo, kernel hardening, fwupd
+    # ── Kernel, graphics & desktop ──────────────────────────────────────────
+    ./modules/kernel-desktop.nix
+    #   boot:     bootloader, lanzaboote, CachyOS kernel
+    #   graphics: Intel + NVIDIA Prime offload
+    #   desktop:  SDDM, Plasma, Hyprland, portals
+    #   fonts
 
-    # ── Hardware ────────────────────────────────────────────────────────────
-    ./modules/graphics.nix        # Intel + NVIDIA Prime offload
-    ./modules/hardware.nix        # bluetooth, firmware, udev rules
-    ./modules/audio.nix           # PipeWire
-
-    # ── Network ─────────────────────────────────────────────────────────────
-    ./modules/networking.nix      # hostname, NetworkManager, Tailscale
-    ./modules/firewall.nix        # open ports
+    # ── Network shares ──────────────────────────────────────────────────────
     ./modules/samba.nix           # shares, WSDD, Avahi
 
-    # ── Desktop & users ─────────────────────────────────────────────────────
-    ./modules/desktop.nix         # SDDM, Plasma, Hyprland, portals
-    ./modules/fonts.nix
-    ./modules/users.nix
+    # ── Virtualisation ──────────────────────────────────────────────────────
+    ./modules/virtualisation.nix  # Podman, libvirt
 
     # ── Everything else ─────────────────────────────────────────────────────
-    ./modules/virtualisation.nix  # Podman, libvirt
-    ./modules/services.nix        # ClamAV, gvfs, udisks, flatpak, usbmuxd
+    ./modules/system.nix
+    #   nix:         flakes, garbage collection, unfree
+    #   locale:      timezone, language, TTY console
+    #   filesystems: extra mounts (LinuxPart, WindowsPart)
+    #   memory:      zram, swapfile, vm sysctl tuning
+    #   security:    sudo, kernel hardening, fwupd
+    #   hardware:    bluetooth, firmware, udev rules
+    #   audio:       PipeWire
+    #   networking:  hostname, NetworkManager, Tailscale
+    #   firewall:    open ports
+    #   users
+    #   services:    ClamAV, gvfs, udisks, flatpak, usbmuxd
   ];
 
   # ── System Version ─────────────────────────────────────────────────────────
