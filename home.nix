@@ -22,8 +22,13 @@
       name = "Dracula";
       package = pkgs.dracula-theme;
     };
+    gtk2.force = true;
     gtk4.theme = config.gtk.theme;
   };
+
+  # Force Home Manager to overwrite GTK files modified by KDE Plasma
+  xdg.configFile."gtk-3.0/settings.ini".force = true;
+  xdg.configFile."gtk-4.0/settings.ini".force = true;
 
   programs.fastfetch = {
     enable = true;
@@ -177,6 +182,12 @@
     };
   };
 
+  services.udiskie = {
+    enable = true;
+    notify = true;      # Enables notify-send popups through Dunst
+    automount = true;   # Automatically mounts the drive so it appears in Nautilus instantly
+  };
+
   xdg.configFile."fish/conf.d/custom_init.fish".text = ''
     if not set -q CONTAINER_ID
         fish_add_path /home/mirkolouis/.local/bin
@@ -204,6 +215,33 @@
         echo $history[1]
     end
     abbr -a !! --position anywhere --function last_history_item
+  '';
+
+  xdg.configFile."wlogout/layout".text = ''
+    {
+        "label" : "suspend",
+        "action" : "systemctl suspend",
+        "text" : "Suspend",
+        "keybind" : "u"
+    }
+    {
+        "label" : "logout",
+        "action" : "hyprctl dispatch exit",
+        "text" : "Logout",
+        "keybind" : "e"
+    }
+    {
+        "label" : "shutdown",
+        "action" : "systemctl poweroff",
+        "text" : "Shutdown",
+        "keybind" : "s"
+    }
+    {
+        "label" : "reboot",
+        "action" : "systemctl reboot",
+        "text" : "Reboot",
+        "keybind" : "r"
+    }
   '';
 
   xdg.configFile."electron-flags.conf".text = ''
