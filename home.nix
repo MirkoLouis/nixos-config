@@ -192,13 +192,48 @@
     if not set -q CONTAINER_ID
         fish_add_path /home/mirkolouis/.local/bin
 
-        # Custom NixOS aliases
-        alias nixos-update="sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
-        alias nixos-upgrade="sudo nix flake update --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
-        
-        # Safely updates standard system packages while ignoring Chaotic-Nyx (kernel) updates
-        alias nixos-upgrade-safe="sudo nix flake update nixpkgs home-manager --flake /etc/nixos && sudo git -C /etc/nixos add . && sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS"
-        
+        # ── NixOS rebuild + auto commit/push ────────────────────────────────
+        function __nixos_rebuild
+            git -C /etc/nixos add .
+            and sudo nixos-rebuild switch --flake /etc/nixos/#MirkoInNIXOS
+        end
+
+        # usage: __nixos_commit_push <default message> [message from user]
+        function __nixos_commit_push
+            set -l repo /etc/nixos
+            git -C $repo add .
+            if git -C $repo diff --cached --quiet
+                echo "No config changes to commit."
+                return 0
+            end
+            echo
+            git -C $repo status --short
+            set -l msg $argv[2]
+            if test -z "$msg"
+                read -P "Commit message (Enter = \"$argv[1]\"): " msg
+            end
+            test -z "$msg"; and set msg $argv[1]
+            git -C $repo commit -m "$msg"
+            and git -C $repo push
+        end
+
+        function nixos-update --description "Rebuild, then commit & push /etc/nixos"
+            __nixos_rebuild; or return 1
+            __nixos_commit_push "update "(date '+%Y-%m-%d %H:%M') (string join " " $argv)
+        end
+
+        function nixos-upgrade --description "Update all flake inputs, rebuild, commit & push"
+            nix flake update --flake /etc/nixos; or return 1
+            __nixos_rebuild; or return 1
+            __nixos_commit_push "flake update "(date +%Y-%m-%d) (string join " " $argv)
+        end
+
+        function nixos-upgrade-safe --description "Update nixpkgs + home-manager only, rebuild, commit & push"
+            nix flake update nixpkgs home-manager --flake /etc/nixos; or return 1
+            __nixos_rebuild; or return 1
+            __nixos_commit_push "flake update (safe) "(date +%Y-%m-%d) (string join " " $argv)
+        end
+
         alias nixos-bios="systemctl reboot --firmware-setup"
         alias nixos-cleanup="sudo nix-collect-garbage --delete-older-than 7d"
         alias nixos-optimize="sudo nix store optimise"
