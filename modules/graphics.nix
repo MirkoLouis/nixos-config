@@ -11,7 +11,7 @@
 
   hardware.nvidia = {
     modesetting.enable = true;
-    open = true; # Open source drivers?
+    open = true; # Open source kernel module
     nvidiaSettings = true;
     package = pkgs.nvidia_cachyos;
     prime = {

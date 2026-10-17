@@ -36,14 +36,12 @@
     handbrake	# all-around media transcoder
     apostrophe	# md file viewer
     librewolf	# firefox fork
-    tailscale	# expanding lan to internet?
     brave	# the one and only brave browser
     libimobiledevice	# for usb tethering
     proton-vpn 	# free VPN
 
     # Heker
     nmap	# network mapping
-    wireshark	# network protocol analyzer
 
     # Hyprland
     dunst	# notification daemon
@@ -108,6 +106,13 @@
   programs.localsend = {
     enable = true;
     openFirewall = true;
+  };
+
+  programs.virt-manager.enable = true;
+
+  programs.wireshark = {
+    enable  = true;
+    package = pkgs.wireshark;   # GUI version (default is CLI-only)
   };
 
   # Programs that need SUID wrappers or run in user sessions

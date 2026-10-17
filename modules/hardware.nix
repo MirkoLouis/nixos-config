@@ -11,7 +11,7 @@
 
   # For HE Keyboard to be recognized in Chromium Browsers
   services.udev.extraRules = ''
-    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666", TAG+="uaccess"
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1ca6", TAG+="uaccess"
   '';
 
   # Enable touchpad support (enabled by default in most desktopManagers)

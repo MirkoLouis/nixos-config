@@ -4,7 +4,7 @@
   users.users.mirkolouis = {
     isNormalUser = true;
     description  = "mirkolouis";
-    extraGroups  = [ "networkmanager" "wheel" "libvirtd" "kvm" ];
+    extraGroups  = [ "networkmanager" "wheel" "libvirtd" "kvm" "wireshark" ];
     shell = pkgs.fish;
   };
 
