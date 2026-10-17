@@ -13,8 +13,6 @@
         "server string" = "MirkoInNIXOS Samba Server";
         "netbios name"  = "MirkoInNIXOS";
         "security"      = "user";
-        "guest account" = "nobody";
-        "map to guest"  = "Bad User";
       };
       "Anime" = {
         "path"        = "/mnt/LinuxPart/Anime/";

@@ -137,7 +137,7 @@
       active_border_color = "#f8f8f2";
       inactive_border_color = "#6272a4";
 
-      allow_remote_control = "yes";
+      allow_remote_control = "socket-only";
       listen_on = "unix:/tmp/kitty-{kitty_pid}.sock";
     };
   };

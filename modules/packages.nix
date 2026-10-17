@@ -94,7 +94,7 @@
   programs.steam = {
     enable                       = true;
     remotePlay.openFirewall      = true;
-    dedicatedServer.openFirewall = true;
+    dedicatedServer.openFirewall = false;
     gamescopeSession.enable      = true; # Wayland-native compositor for gaming
   };
 

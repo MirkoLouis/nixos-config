@@ -22,7 +22,7 @@
 
   # 3. Kernel Tuning for zRAM and Gaming Responsiveness
   boot.kernel.sysctl = {
-    "vm.swappiness" = 50;
+    "vm.swappiness" = 150;
     "vm.watermark_boost_factor" = 0;
     "vm.watermark_scale_factor" = 125;
     "vm.page-cluster" = 0;

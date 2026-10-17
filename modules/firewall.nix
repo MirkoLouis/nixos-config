@@ -7,6 +7,6 @@
     enable = true;
     rejectPackets = false;
     allowedTCPPorts = [ 8000 3000 3050 3051 ];
-    allowedUDPPorts = [ 8000 3000 3050 3051 ];
+    allowedUDPPorts = [];
   };
 }

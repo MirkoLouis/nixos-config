@@ -2,6 +2,7 @@
 
 {
   hardware.enableAllFirmware = true;
+  services.thermald.enable = true;   # Intel thermal management
 
   # Bluetooth
   hardware.bluetooth = {

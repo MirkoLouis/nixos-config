@@ -13,6 +13,7 @@
     ./modules/locale.nix          # timezone, language, TTY console
     ./modules/filesystems.nix     # extra mounts (LinuxPart, WindowsPart)
     ./modules/memory.nix          # zram, swapfile, vm sysctl tuning
+    ./modules/security.nix        # sudo, kernel hardening, fwupd
 
     # ── Hardware ────────────────────────────────────────────────────────────
     ./modules/graphics.nix        # Intel + NVIDIA Prime offload

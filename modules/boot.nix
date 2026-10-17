@@ -13,11 +13,13 @@
   };
 
   # CachyOS kernel (from Chaotic-Nyx)
-  boot.kernelPackages = pkgs.linuxPackages_cachyos.cachyOverride {
-    cachyVars = pkgs.linuxPackages_cachyos-lts.kernel.cachyConfig.cachyVars // {
-      "_processor_opt" = "GENERIC_V4";
-    };
-  };
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  
+  #boot.kernelPackages = pkgs.linuxPackages_cachyos.cachyOverride {
+  #  cachyVars = pkgs.linuxPackages_cachyos-lts.kernel.cachyConfig.cachyVars // {
+  #    "_processor_opt" = "GENERIC_V4";
+  #  };
+  #};
 
   boot.kernelParams = [ "split_lock_detect=off" ];
 
