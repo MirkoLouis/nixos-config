@@ -37,6 +37,7 @@
     brave	# the one and only brave browser
     libimobiledevice	# for usb tethering
     proton-vpn 	# free VPN
+    mission-center	# system monitor
 
     # Heker
     nmap	# network mapping

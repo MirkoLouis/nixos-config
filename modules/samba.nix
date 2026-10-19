@@ -3,7 +3,6 @@
 {
   # Samba file shares (accessible to @wheel group and sambaro read-only user;
   # Backup share is for @wheel and the sambawo backup user)
-  # Samba users themselves are defined in users.nix.
   services.samba = {
     enable = true;
     openFirewall = true;
