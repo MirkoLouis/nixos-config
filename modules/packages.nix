@@ -112,6 +112,15 @@
     package = pkgs.wireshark;   # GUI version (default is CLI-only)
   };
 
+  # Mission Center: per-process network stats and sensors
+  # (replaces its "additional setup" script, which can't run on NixOS)
+  security.wrappers.nethogs = {
+    owner = "root";
+    group = "root";
+    capabilities = "cap_net_admin,cap_net_raw,cap_dac_read_search,cap_sys_ptrace+pe";
+    source = "${pkgs.nethogs}/bin/nethogs";
+  };
+
   # Programs that need SUID wrappers or run in user sessions
   # programs.mtr.enable = true;
   # programs.gnupg.agent = {
