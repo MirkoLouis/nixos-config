@@ -83,7 +83,7 @@ in
     };
     powerManagement = {
       enable = true;
-      finegrained = true;
+      finegrained = false;	# was true - allows for gpu to fully power down when idle
     };
     dynamicBoost.enable = false; # Did not work during testing
   };

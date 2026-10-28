@@ -62,7 +62,7 @@
     enable = true;
     priority = 100;
     memoryPercent = 50;  # Allows up to 8GB of your RAM to be used for compression
-    algorithm = "zstd";  # Zstandard offers the best compression-to-CPU-cost ratio
+    algorithm = "lz4";  # Zstandard offers the best compression-to-CPU-cost ratio
   };
 
   # 2. Low-Priority Physical Swapfile on NVMe Root (/)
