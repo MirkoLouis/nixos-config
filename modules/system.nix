@@ -59,10 +59,10 @@
 
   # 1. High-Priority In-Memory Compressed Swap
   zramSwap = {
-    enable = true;
+    enable = false;
     priority = 100;
-    memoryPercent = 50;  # Allows up to 8GB of your RAM to be used for compression
-    algorithm = "lz4";  # Zstandard offers the best compression-to-CPU-cost ratio
+    memoryPercent = 50;  # How much of physical memory to be allowed
+    algorithm = "lz4";  
   };
 
   # 2. Low-Priority Physical Swapfile on NVMe Root (/)
