@@ -29,6 +29,12 @@
   # Force Home Manager to overwrite GTK files modified by KDE Plasma
   xdg.configFile."gtk-3.0/settings.ini".force = true;
   xdg.configFile."gtk-4.0/settings.ini".force = true;
+  # Enable flakes for every Nix client that runs as me, including the
+  # distrobox's apt-installed nix (it can't see the host's /etc/nix/nix.conf,
+  # but it reads ~/.config/nix/nix.conf from the shared home directory)
+  xdg.configFile."nix/nix.conf".text = ''
+    experimental-features = nix-command flakes
+  '';
 
   programs.git.enable = true;
 
