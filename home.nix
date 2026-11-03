@@ -22,6 +22,9 @@
       name = "Dracula";
       package = pkgs.dracula-theme;
     };
+    iconTheme = {
+      name = "Papirus-Dark";
+    };
     gtk2.force = true;
     gtk4.theme = config.gtk.theme;
   };
@@ -301,7 +304,6 @@
     BUN_INSTALL = "/home/mirkolouis/.bun";
     NIXOS_OZONE_WL = "1";
     GTK_USE_PORTAL = "1";
-    GTK_THEME = "Dracula";
   };
   
   home.sessionPath = [
