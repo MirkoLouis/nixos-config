@@ -23,8 +23,7 @@
       package = pkgs.dracula-theme;
     };
     iconTheme = {
-      name = "Dracula";
-      package = pkgs.dracula-icon-theme;
+      name = "dracula-icons-main";
     };
     gtk2.force = true;
     gtk4.theme = config.gtk.theme;
