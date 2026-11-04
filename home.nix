@@ -1,5 +1,20 @@
 { config, pkgs, inputs, ... }:
 
+let
+  # A user service that runs only in the UWSM Hyprland session (not Plasma)
+  hyprlandService = description: command: {
+    Unit = {
+      Description = description;
+      PartOf = [ "wayland-session@hyprland.desktop.target" ];
+      After  = [ "wayland-session@hyprland.desktop.target" ];
+    };
+    Service = {
+      ExecStart = command;
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "wayland-session@hyprland.desktop.target" ];
+  };
+in
 {
   imports = [ 
     ./fish-db-functions.nix 
@@ -202,7 +217,27 @@
     enable = true;
     notify = true;      # Enables notify-send popups through Dunst
     automount = true;   # Automatically mounts the drive so it appears in Nautilus instantly
+    tray = "never";
   };
+
+  systemd.user.services = {
+    ashell      = hyprlandService "ashell status bar"   "${pkgs.ashell}/bin/ashell";
+    hypridle    = hyprlandService "Hyprland idle daemon" "${pkgs.hypridle}/bin/hypridle";
+    awww-daemon = hyprlandService "Wallpaper daemon"     "${pkgs.awww}/bin/awww-daemon";
+  };
+
+  services.cliphist = {
+    enable = true;
+    allowImages = true;
+    extraOptions = [ "-max-items" "20" ];
+    systemdTargets = [ "wayland-session@hyprland.desktop.target" ];
+  };
+
+  xdg.configFile."autostart/nm-applet.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Hidden=true
+  '';
 
   xdg.configFile."fish/conf.d/custom_init.fish".text = ''
     if not set -q CONTAINER_ID
@@ -277,7 +312,7 @@
     }
     {
         "label" : "logout",
-        "action" : "hyprctl dispatch exit",
+        "action" : "uwsm stop",
         "text" : "Logout",
         "keybind" : "e"
     }
