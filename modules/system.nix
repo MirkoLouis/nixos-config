@@ -137,7 +137,11 @@
   };
 
   # Tailscale — installed but not started on boot (start it manually)
-  services.tailscale.enable = true;
+  services.tailscale = { 
+    enable = true;
+    extraSetFlags = [ "--operator=mirkolouis" ];  # lets you run `tailscale up` without sudo
+  };
+
   systemd.services.tailscaled.wantedBy = lib.mkForce [];
 
   # Enable the OpenSSH daemon
