@@ -59,10 +59,10 @@
 
   # 1. High-Priority In-Memory Compressed Swap
   zramSwap = {
-    enable = false;
+    enable = true;
     priority = 100;
     memoryPercent = 50;  # How much of physical memory to be allowed
-    algorithm = "lz4";  
+    algorithm = "lz4"; 
   };
 
   # 2. Low-Priority Physical Swapfile on NVMe Root (/)
@@ -76,11 +76,14 @@
 
   # 3. Kernel Tuning for zRAM and Gaming Responsiveness
   boot.kernel.sysctl = {
-    "vm.swappiness" = 150;
+    "vm.swappiness" = 100;
     "vm.watermark_boost_factor" = 0;
-    "vm.watermark_scale_factor" = 125;
+    "vm.watermark_scale_factor" = 10;
     "vm.page-cluster" = 0;
   };
+
+  # Stop the MGLRU from thrashing the game's working set under pressure
+  systemd.tmpfiles.rules = [ "w /sys/kernel/mm/lru_gen/min_ttl_ms - - - - 1000" ];
 
   # ══ Security (was security.nix) ═════════════════════════════════════════════
 

@@ -50,7 +50,7 @@ in
   #  };
   #};
 
-  boot.kernelParams = [ "split_lock_detect=off" ];
+  boot.kernelParams = [ "split_lock_detect=off" "zswap.enabled=0" ];
 
   boot.supportedFilesystems = [ "ntfs" ];
 

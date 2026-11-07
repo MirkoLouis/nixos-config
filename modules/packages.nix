@@ -71,7 +71,6 @@
     lutris      # Universal game manager
     protonup-qt # GE-Proton version manager
     mangohud    # In-game performance overlay
-    bottles	# another game manager
     protontricks	# a gui for winetricks
     winetricks	# provides a cli to tweak wine prefixes
 
