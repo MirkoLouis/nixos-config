@@ -339,6 +339,7 @@ in
     BUN_INSTALL = "/home/mirkolouis/.bun";
     NIXOS_OZONE_WL = "1";
     GTK_USE_PORTAL = "1";
+    TERMINFO_DIRS = "${pkgs.kitty.terminfo.outPath}/share/terminfo";
   };
   
   home.sessionPath = [
