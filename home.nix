@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 let
   # A user service that runs only in the UWSM Hyprland session (not Plasma)
@@ -339,8 +339,13 @@ in
     BUN_INSTALL = "/home/mirkolouis/.bun";
     NIXOS_OZONE_WL = "1";
     GTK_USE_PORTAL = "1";
-    TERMINFO_DIRS = "${pkgs.kitty.terminfo.outPath}/share/terminfo";
   };
+
+  home.activation.kittyTerminfo = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run mkdir -p $HOME/.terminfo/x
+    run install -m644 ${pkgs.kitty.terminfo}/share/terminfo/x/xterm-kitty \
+    $HOME/.terminfo/x/xterm-kitty
+  '';
   
   home.sessionPath = [
     "/home/mirkolouis/.local/bin"
