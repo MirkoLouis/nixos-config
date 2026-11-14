@@ -161,8 +161,9 @@
   networking.firewall = {
     enable = true;
     rejectPackets = false;
-    allowedTCPPorts = [ 8000 3000 3050 3051 ];
+    allowedTCPPorts = [ 8000 3000 3050 3051 25565 ];
     allowedUDPPorts = [];
+    trustedInterfaces = [ "tailscale0" ];
   };
 
   # ══ Users (was users.nix) ═══════════════════════════════════════════════════
